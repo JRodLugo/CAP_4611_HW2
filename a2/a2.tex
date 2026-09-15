@@ -405,6 +405,7 @@
     \ask{What is the cost of classifying $t$ test examples with the model and this way of computing the predictions?}
     %
 
+    \ans{The cost would be O(tkd)}
 
     \clearpage
     \section{Random Forests \pts{15}}
@@ -495,35 +496,56 @@
     \begin{enumerate}
         \item What is a reason that the the data may not be IID in the email spam filtering example from lecture?
         %
+        \ans{data may not be IID in the email spam filtering example because emails from the same sender or time period can be correlated rather than generated independently 
+        generated, distribution can also change over time}
 
         \item Why can't we (typically) use the training error to select a hyper-parameter?
         %
+        \ans{We can't use the training error to select a hyper-parameter because, the training error favors models that fit the data to closely, leading to 
+        validation errors}
 
         \item What is the effect of the training or validation set size $n$ on the optimization bias, assuming we use a parametric model?
         %
+        \ans{The effects of training or validating a set size $n$ on the optimization bias is that a larger training set generally reduces optimization bias
+        because the fitted parameters are more representative of the underlying distribution}
 
         \item What is an advantage and a disadvantage of using a large $k$ value in $k$-fold cross-validation?
         %
+        \ans{The advantage would be a larger $k$ in $k$-fold cross-validation means each model is trained on more data so estimate is less bias.
+        However the disadvantage is a greater O(n) runtime cost because of the amount of models to be trained}
 
         \item Recall that false positive in binary classification means $\hat y_i=1$ while $\tilde y_i = 0$. Give an example of when increasing false positives is an acceptable risk.
         %
+        \ans{An example of when increasing false positives is an acceptable risk would be in the case of a medical screaning or where it might be better to flag certain people
+        for a follow-up just to be safe}
 
         \item Why can we ignore $p(x_i)$ when we use naive Bayes?
         %
+        \ans{We can ignore $p(x_i)$ when we use naive Bayes because it is the same for every possible class  $\tilde y_i$}
 
         \item For each of the three values below in a naive Bayes model, say whether it's better considered as a parameter or a hyper-parameter:
         \begin{enumerate}
             \item Our estimate of $p(y_i)$ for some $y_i$.
+            \ans{parameter}
+
             \item Our estimate of $p(x_{ij} \mid y_i)$ for some $x_{ij}$ and $y_i$.
+            \ans{parameter}
+
             \item The value $\beta$ in Laplace smoothing.
+            \ans{hyper-parameter}
+
         \end{enumerate}
         %
 
         \item Both supervised learning and clustering models take in an input $x_i$ and produce a label $y_i$. What is the key difference between these types of models?
         %
+        \ans{The key difference is that in supervised learning the labels have known meanings based on labeled training data, where as in clustering
+        the labels are created by the algorithm and usually only indicate membership}
 
         \item In $k$-means clustering the clusters are guaranteed to be convex regions. Are the areas that are given the same label by kNN also convex?
         %
+        \ans{The areas that are not given the same label by kNN also convex}
+
     \end{enumerate}
 
 \end{document}
