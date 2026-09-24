@@ -125,7 +125,7 @@ def predict(self, X_hat):
         }
         \item Generate a plot with \texttt{utils.plot\_classifier} on the \emph{citiesSmall} dataset (plotting the training points) for $k=1$, using your implementation of kNN. \ask{Include the plot here.} To see if your implementation makes sense, you might want to check against the plot using \texttt{sklearn.neighbors.KNeighborsClassifier}. Remember that the assignment 1 code had examples of plotting with this function and saving the result, if that would be helpful. \pts{2}
         \ans{
-
+            \centerfig{.8}{a2/figs/q1_knn_boundary.png}
         }
         \item Why is the training error $0$ for $k=1$? \pts{2}
 
@@ -193,7 +193,7 @@ cv_accs = [] #stores the mean accurancy across folds for each k
         \item The point of cross-validation is to get a sense of what the test error for a particular value of $k$ would be. Implement, similarly to the code you wrote for question 1.2, a loop to compute the test accuracy for each value of $k$ above. \ask{Submit a plot the cross-validation and test accuracies as a function of $k$.} Make sure your plot has axis labels and a legend. \pts{5}
 
         %
-        \ans{}
+        \ans{\centerfig{.8}{a2/figs/q2_cv_test_accuracy.png}}
         \item Which $k$ would cross-validation choose in this case? Which $k$ has the best test accuracy? Would the cross-validation $k$ do okay (qualitatively) in terms of test accuracy? \pts{2}
 
         %
@@ -203,6 +203,7 @@ cv_accs = [] #stores the mean accurancy across folds for each k
         \item Separately, \ask{submit a plot of the training error as a function of $k$. How would the $k$ with best training error do in terms of test error, qualitatively?} \pts{3}
         %
         \ans{The K with the best training error would be 1 with a training error of .408 dispite having a .592 training accuracy. This could be the result of possible over fitting.}
+        \centerfig{.8}{a2/figs/q2_training_error.png}
     \end{enumerate}
 
 
@@ -573,10 +574,10 @@ def __init__(self, num_trees, max_depth):
     and a very obvious clustering structure. It will then apply the $k$-means algorithm
     with a random initialization. The result of applying the
     algorithm will thus depend on the randomization, but a typical run might look like this:
-    \centerfig{.5}{figs/kmeans_basic.png}
+    \centerfig{.5}{a2/figs/kmeans_basic.png}
     (Note that the colours are arbitrary -- this is the label switching issue.)
     But the ``correct'' clustering (that was used to make the data) is this:
-    \centerfig{.5}{figs/kmeans_good.png}
+    \centerfig{.5}{a2/figs/kmeans_good.png}
 
 
     \clearpage
@@ -614,6 +615,7 @@ def error(self, X, y, means):
         \item Run $k$-means 50 times (with $k=4$) and take the one with the lowest error. \ask{Report the lowest error obtained.} Visualize the clustering obtained by this model, and \ask{submit your plot}. \pts{3}
         %
         \ans{The lowest error obtained was 14641.961900}
+        \centerfig{.8}{a2/figs/q5_best_clustering.png}
 
     \end{enumerate}
 
@@ -634,7 +636,7 @@ def error(self, X, y, means):
 
         \item \ask{Hand in a plot of the minimum error found across 50 random initializations, as a function of $k$, taking $k$ from $1$ to $10$.} \pts{2}
         %
-        \ans{}
+        \ans{\centerfig{.8}{a2/figs/q5_elbow.png}}
 
         \item The \emph{elbow method} for choosing $k$ consists of looking at the above plot and visually trying to choose the $k$ that makes the sharpest ``elbow" (the biggest change in slope). \ask{What values of $k$ might be reasonable according to this method?} Note: there is not a single correct answer here; it is somewhat open to interpretation and there is a range of reasonable answers. \pts{2}
         %
