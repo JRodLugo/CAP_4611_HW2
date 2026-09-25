@@ -91,8 +91,7 @@ plt.title('Credit-card debt: training error')
 plt.grid(alpha=.25)
 save('q2_training_error.png')
 
-# Use the supplied fitting implementation and the SSE formula submitted in
-# the LaTeX. The source Kmeans.error remains untouched (it is unfinished).
+# Use the assignment fitting implementation and its completed SSE method.
 X = data('clusterData')['X']
 np.random.seed(4611)
 minimum_errors = []
@@ -102,7 +101,7 @@ for k in range(1, 11):
         model = Kmeans(k)
         model.fit(X)
         labels = model.predict(X)
-        sse = float(np.sum((X - model.means[labels]) ** 2))
+        sse = model.error(X, labels, model.means)
         if sse < best:
             best, best_labels, best_means = sse, labels.copy(), model.means.copy()
     minimum_errors.append(best)

@@ -52,10 +52,10 @@
 
 \begin{document}
     \title{CAP 4611 Assignment 2}
-    \author{}
+    \author{[Student 1 Full Name] --- [Student 1 Number]\\{}[Student 2 Full Name] --- [Student 2 Number]}
     \date{}
     \maketitle
-    \vspace{-4em}
+    % Remove the second author line if submitting individually.
 
 
     \section*{Important: Submission Format \pts{5}}
@@ -70,6 +70,7 @@
     submission. For more detailed instructions, see the link above.
 
     \section{K-Nearest Neighbours \pts{15}}
+    {\small\textit{Assistance: OpenAI Codex assisted with code corrections, explanations, and verification; numerical results were computed from the supplied datasets.}}
 
     In the \emph{citiesSmall} dataset (introduced in A1), nearby points tend to receive the same class label because they are part of the same U.S. state. For this problem, perhaps a $k$-nearest neighbours classifier might be a better choice than a decision tree. The file \emph{knn.py} has implemented the training function for a $k$-nearest neighbour classifier (which is to just memorize the data).
 
@@ -81,64 +82,64 @@
         \par\noindent\textcolor{gre}{Answer:}
 \begin{lstlisting}
 def predict(self, X_hat):
-        #"""YOUR CODE HERE FOR Q1"""
-        #fills in the k-nearest neigbor prediction rule
-        #distance = num of training points(i) * num of test points(j)
-        distance = euclidean_dist_squared(self.X, X_hat)
+    #fills in the k-nearest neigbor prediction rule
+    #distance = num of training points(i) * num of test points(j)
+    distance = euclidean_dist_squared(self.X, X_hat)
 
-        #array to hold the predictions for each test case
-        Y_hat = np.zeros(X_hat.shape[0])
+    #array to hold the predictions for each test case
+    Y_hat = np.zeros(X_hat.shape[0])
 
-        #goes through the test points
-        for i in range(X_hat.shape[0]):
-            #gets and sorts the current distance
-            cur_dist = distance[:, i]
-            sorted_indices = np.argsort(cur_dist)
-            #Gets first k indicies, gets label of k nearest training points, Predict most common label
-            Y_hat[i] = utils.mode(self.y[sorted_indices[:self.k]])
+    #goes through the test points
+    for i in range(X_hat.shape[0]):
+        #gets and sorts the current distance
+        cur_dist = distance[:, i]
+        sorted_indices = np.argsort(cur_dist)
+        #Gets first k indicies, gets label of k nearest training points, Predict most common label
+        Y_hat[i] = utils.mode(self.y[sorted_indices[:self.k]])
 
-        #return the predictions
-        return Y_hat 
-        #raise NotImplementedError()
-        IN MAIN
-        for k in [1,3,10]:
-        print("k = ", k)
-        model = KNN(k)
-
-        #training the model, make predictions
-        model.fit(X, y)
-        y_predictions_training = model.predict(X)
-        y_predictions_test = model.predict(X_test)
-
-        #prints results
-        #np.mean is a boolen array, auto checks when prediction was right or wrong
-        print("train data accuracy = ", np.mean(y_predictions_training == y))
-        print("train err data = ", np.mean(y_predictions_training != y))
-        print("test data accuracy = ", np.mean(y_predictions_test == y_test))
-        print("test err data = ", np.mean(y_predictions_test != y_test))
-        print()
+    #return the predictions
+    return Y_hat 
 \end{lstlisting}
 
         \item \ask{Report the training and test error} obtained on the \emph{citiesSmall} dataset for $k=1$, $k=3$, and $k=10$. \emph{Optionally}, try running a decision tree on this same train/test split; which gets better test accuracy? \pts{4}
-        \ans{
-            After running the tests it is shown that k=3 gives the better results than the other results.
-        }
+        \ans{\begin{center}
+\begin{tabular}{c|cc}
+$k$ & Training error & Test error \\ \hline
+1 & 0.0000 & 0.0645 \\
+3 & 0.0275 & 0.0660 \\
+10 & 0.0575 & 0.0850
+\end{tabular}
+\end{center}
+Among these three choices, $k=1$ has the lowest test error (6.45\%).}
+
+\begin{lstlisting}
+for k in [1, 3, 10]:
+    model = KNN(k)
+    model.fit(X, y)
+    print(k, np.mean(model.predict(X) != y),
+          np.mean(model.predict(X_test) != y_test))
+model = KNN(1)
+model.fit(X, y)
+utils.plot_classifier(model, X, y)
+plt.savefig('../figs/q1_knn_boundary.png')
+\end{lstlisting}
         \item Generate a plot with \texttt{utils.plot\_classifier} on the \emph{citiesSmall} dataset (plotting the training points) for $k=1$, using your implementation of kNN. \ask{Include the plot here.} To see if your implementation makes sense, you might want to check against the plot using \texttt{sklearn.neighbors.KNeighborsClassifier}. Remember that the assignment 1 code had examples of plotting with this function and saving the result, if that would be helpful. \pts{2}
         \ans{
             \centerfig{.8}{a2/figs/q1_knn_boundary.png}
         }
         \item Why is the training error $0$ for $k=1$? \pts{2}
 
-        \ans{The reason why training error is 0 for k=1 because of over fitting}
+        \ans{For $k=1$, a training example is its own nearest neighbour at distance zero, so it receives its own label. Thus the training error is zero on this dataset, with ties handled as specified.}
 
         \item Recall that we want to choose hyper-parameters so that the test error is (hopefully) minimized. How would you choose $k$? \pts{2}
 
-        \ans{Using the fold cross-validation method where the model is trained on 80 to 90\% of the data, and validated using the remaining data}
+        \ans{Choose the $k$ with the lowest mean validation error in cross-validation performed only on the training data. Then refit on the entire training set and use the held-out test set once to estimate generalization error.}
 
     \end{enumerate}
 
     \clearpage
     \section{Picking $k$ in kNN \pts{15}}
+    {\small\textit{Assistance: OpenAI Codex assisted with code corrections, explanations, and verification; numerical results were computed from the supplied datasets.}}
     The file \texttt{data/ccdata.pkl} contains a subset of \href{https://www23.statcan.gc.ca/imdb/p2SV.pl?Function=getSurvey&SDDS=2620}{Statistics Canada's 2019 Survey of Financial Security}; we're predicting whether a family regularly carries credit card debt, based on a bunch of demographic and financial information about them. (You might imagine social science researchers wanting to do something like this if they don't have debt information available -- or various companies wanting to do it for less altruistic reasons.) If you're curious what the features are, you can look at the \texttt{'feat\_descs'} entry in the dataset dictionary.
 
     Anyway, now that we have our kNN algorithm working,\footnote{If you haven't finished the code for question 1, or if you'd just prefer a slightly faster implementation, you can use scikit-learn's \texttt{KNeighborsClassifier} instead. The \texttt{fit} and \texttt{predict} methods are the same; the only difference for our purposes is that \texttt{KNN(k=3)} becomes \texttt{KNeighborsClassifier(n\_neighbors=3)}.} let's try choosing $k$ on this data!
@@ -152,22 +153,31 @@ def predict(self, X_hat):
 
         \par\noindent\textcolor{gre}{Answer:}
 \begin{lstlisting}
-cv_accs = [] #stores the mean accurancy across folds for each k 
+def q2():
+    dataset = load_dataset("ccdebt.pkl")
+    X = dataset["X"]
+    y = dataset["y"]
+    X_test = dataset["Xtest"]
+    y_test = dataset["ytest"]
+
+    ks = list(range(1, 30, 4))
+    cv_accs = [] #stores the mean accurancy across folds for each k
+    cv_err = [] #stores the mean error across folds for each k 
     num_train_ex = X.shape[0]
     fold_size = num_train_ex // 10
-    
-    #raise NotImplementedError()
-    
+
+
     #implement 10-fold cross-validation
     for depth in ks:
         #stores the current fold
         fold_accs = []
+        fold_err = []
         #preforms the 10-fold cross validation
         for fold in range(10):
             #begin with everything marked as true
             mask = np.ones(num_train_ex, dtype=bool)
-            start = fold * fold_size
-            end = (fold  + 1 ) * fold_size
+            start = fold * num_train_ex // 10
+            end = (fold + 1) * num_train_ex // 10
 
             #mark validation examples as false
             mask[start:end] = False
@@ -177,32 +187,80 @@ cv_accs = [] #stores the mean accurancy across folds for each k
             model.fit(X[mask], y[mask])
 
             #make predictions, get the accuracy
-            model.predict()
             y_predictions = model.predict(X[~mask])
-            accuracy = np.mean(y_predictions == y)
+            accuracy = np.mean(y_predictions == y[~mask])
+            foldError = np.mean(y_predictions != y[~mask])
             #inputs current accuracy into the array
             fold_accs.append(accuracy)
+            fold_err.append(foldError)
         #input folds array into the cross validation array 
         cv_accs.append(np.mean(fold_accs))
+        cv_err.append(np.mean(fold_err))
 
-    print("Current ks: ", ks)
-    print("results: ", cv_accs)
 \end{lstlisting}
 
 
         \item The point of cross-validation is to get a sense of what the test error for a particular value of $k$ would be. Implement, similarly to the code you wrote for question 1.2, a loop to compute the test accuracy for each value of $k$ above. \ask{Submit a plot the cross-validation and test accuracies as a function of $k$.} Make sure your plot has axis labels and a legend. \pts{5}
 
         %
-        \ans{\centerfig{.8}{a2/figs/q2_cv_test_accuracy.png}}
+        
+\begin{lstlisting}
+#test accuracy
+    test_accs = []
+    test_err = []
+    for k in ks:
+         #train KNN
+        model = KNN(k)
+        model.fit(X, y)
+        
+        #make predictions, get the accuracy
+        y_predictions = model.predict(X_test)
+        accuracy = np.mean(y_predictions == y_test)
+        foldError = np.mean(y_predictions != y_test)
+
+        #store accuracy and error
+        test_accs.append(accuracy)
+        test_err.append(foldError)
+
+    print("Current ks: ", ks)
+    print("Cross-Validation Accuracy: ", cv_accs)
+    print("Cross-Validation Error: ", cv_err)
+    print("Test Accuracy: ", test_accs)
+    print("Test Error: ", test_err)
+
+    train_errors = []
+    for k in ks:
+        model = KNN(k)
+        model.fit(X, y)
+        train_errors.append(float(np.mean(model.predict(X) != y)))
+    print('Training errors:', train_errors)
+    plt.figure()
+    plt.plot(ks, cv_accs, 'o-', label='10-fold cross-validation')
+    plt.plot(ks, test_accs, 's-', label='Test')
+    plt.xlabel('Number of neighbours, k')
+    plt.ylabel('Accuracy')
+    plt.xticks(ks)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('../figs/q2_cv_test_accuracy.png', dpi=180)
+    plt.close()
+    plt.figure()
+    plt.plot(ks, train_errors, 'o-')
+    plt.xlabel('Number of neighbours, k')
+    plt.ylabel('Training error (fraction misclassified)')
+    plt.xticks(ks)
+    plt.tight_layout()
+    plt.savefig('../figs/q2_training_error.png', dpi=180)
+    plt.close()
+\end{lstlisting}
+\ans{\centerfig{.8}{a2/figs/q2_cv_test_accuracy.png}}
         \item Which $k$ would cross-validation choose in this case? Which $k$ has the best test accuracy? Would the cross-validation $k$ do okay (qualitatively) in terms of test accuracy? \pts{2}
 
         %
-        \ans{The k that cross-validation would choose is 25, with a .704 for its cross-validation accuracy. The k that has the best test accuracy would be 29 with a .678 test accuracy
-        The results generated from the data shows that the best k for cross validation would do ok in terms of test accuracy, giving the third best accuracy out of the data set.
-        }
+        \ans{Cross-validation chooses $k=17$, with mean accuracy 0.7355. Test accuracy is highest at $k=9$ (0.7380). The cross-validation choice performs well: its test accuracy is 0.7300, only 0.8 percentage points below the best observed test accuracy. The test comparison is retrospective; it is not used to choose $k$.}
         \item Separately, \ask{submit a plot of the training error as a function of $k$. How would the $k$ with best training error do in terms of test error, qualitatively?} \pts{3}
         %
-        \ans{The K with the best training error would be 1 with a training error of .408 dispite having a .592 training accuracy. This could be the result of possible over fitting.}
+        \ans{The best training error occurs at $k=1$ and is 0, corresponding to training accuracy 1. Its test error is 0.3500, the worst among the tested choices, illustrating that fitting the training data perfectly does not imply good generalization.}
         \centerfig{.8}{a2/figs/q2_training_error.png}
     \end{enumerate}
 
@@ -210,6 +268,7 @@ cv_accs = [] #stores the mean accurancy across folds for each k
 
     \clearpage
     \section{Na\"ive Bayes \pts{17}}
+    {\small\textit{Assistance: OpenAI Codex assisted with code corrections, explanations, and verification; numerical results were computed from the supplied datasets.}}
 
     In this section we'll implement Na\"ive Bayes, a very fast classification method that is often surprisingly accurate for text data with simple representations like bag of words.
 
@@ -321,9 +380,7 @@ cv_accs = [] #stores the mean accurancy across folds for each k
     \end{bmatrix}.
     \]
 
-    and with the smoothing P(name = 1 | spam) = 1/6 -> 1+1/6+2 = 2/8
-    added top by 1 because of smoothing
-    added bottem by 2 because 2 more spam tests where added
+    For each class these two additional examples add one zero and one one to every feature. For example, $P(\mathrm{name}=1\mid\mathrm{spam})=(1+1)/(6+2)=2/8$, exactly the estimate with $\beta=1$.
     }
 
     \clearpage
@@ -344,10 +401,10 @@ cv_accs = [] #stores the mean accurancy across folds for each k
         \ans{question}
         \item Which words are present in training example 803 (Python index 802)?
         %
-        \ans{cancer, earth, evidence, ftp, mission, nasa, pc, phone, space}
+        \ans{case, children, health, help, problem, program}
         \item Which newsgroup name does training example 803 come from?
         %
-        \ans{talk}
+        \ans{\texttt{talk.*}}
     \end{enumerate}
 
     \clearpage
@@ -366,13 +423,14 @@ cv_accs = [] #stores the mean accurancy across folds for each k
 
     \par\noindent\textcolor{gre}{Answer:}
 \begin{lstlisting}
-p_xy = np.zeros((d,k))
-
-        for col in range(k):
-            x_col = X[y==col]
-            p_xy = np.mean(x_col, axis = 0)
+p_xy = np.zeros((d, k))
+for c in range(k):
+    X_c = X[y == c]
+    p_xy[:, c] = np.mean(X_c, axis=0)
 \end{lstlisting}
 
+
+    \ans{Training error: $0.199852$ (19.9852\%). Validation error: $0.187662$ (18.7662\%). These results use the supplied prediction method and the corrected class-conditional estimates.}
 
     \clearpage
     \subsection{Laplace Smoothing Implementation \pts{4}}
@@ -383,67 +441,31 @@ p_xy = np.zeros((d,k))
         \par\noindent\textcolor{gre}{Answer:}
 \begin{lstlisting}
 def fit(self, X, y):
-        # """YOUR CODE FOR Q3.4"""
-        # raise NotImplementedError()
-        n, d = X.shape
-
-        #prior probabilities
-        p_y = np.zero(self.num_classes)
-        num_values = []
-
-        #finds number of possible values for each feature
-        for i in range(d):
-            num_values.append(len(np.unique(X[:,i])))
-
-        #p_xy[class, feature, value]
-        p_xy = np.zero(self.num_classes, d, max(num_values))
-
-        for c in range(self.num_classes):
-            #number of examples belonging to class C, and number of exampels in class C
-            X_c = X[y == c]
-            num_examples_c = X_c.shape
-
-            #the Laplace smoothing class probability
-            # Nc + B / N + Bk
-            p_y[c] = (num_examples_c + self.beta) / (n + self.beta * self.num_classes)
-
-            #conditional probabilities
-            for i in range(d):
-                vals = np.unique(X[:,i])
-                V = len(vals)
-                for v in vals:
-                    #counts X_i = v among examples where y = c
-                    count = np.sum(X_c[:,i] == v)
-
-                    p_xy[c, i, int(v)] = (count + self.beta) / (num_examples_c + self.beta * V)
-
-        self.p_y = p_y
-        self.p_xy = p_xy
-        
-        #MAIN
-
-        with_smooth = model.p_xy[:, 0, 1]
-        without_smooth = laplace_model.p_xy[:, 0, 1]
-
-        print("WITH Laplace Smoothing: ")
-        print(with_smooth)
-        print("\n WITHOUT Laplace Smoothing: ")
-        print(without_smooth)
-        print()
+    n, d = X.shape
+    self.p_y = np.bincount(y, minlength=self.num_classes) / n
+    self.p_xy = np.zeros((d, self.num_classes))
+    for c in range(self.num_classes):
+        X_c = X[y == c]
+        self.p_xy[:, c] = (X_c.sum(axis=0) + self.beta) / (
+            X_c.shape[0] + 2 * self.beta
+        )
 \end{lstlisting}
 
 
         \item Using the same data as the previous section, fit Na\"ive Bayes models with \textbf{and} without Laplace smoothing to the training data. Use $\beta=1$ for Laplace smoothing. For each model, look at $p(x_{ij} = 1 \ | \ y_i = 0)$ across all $j$ values (i.e. all features) in both models. \ask{Do you notice any difference? Explain.}
         %
-        \ans{without smoothing some words/features may never occur in class 0 with Laplace smoothing $\beta$ = 1, those probabilities become small non-zero values.
-        This is because some conditional probabilities like p(xij = 1 | yi = 0) equal zero because those features were never observed for class zero. Smoothing allows the
-        zero probabilities to become small non-zero probabilities thanks to the one pseudo-count added to each possible feature}
+        \ans{For class 0, the unsmoothed probabilities are $N_{j,0}/N_0$; with $\beta=1$ they become $(N_{j,0}+1)/(N_0+2)$. Smoothing moves estimates toward $1/2$, making zero probabilities positive and probabilities of one smaller than one. This prevents one previously unseen feature value from forcing an entire class likelihood to zero. In the data, 12 class-0 probabilities are zero without smoothing and none are zero with $\beta=1$; the minimum increases from 0 to 0.000436872.}
 
+
+\begin{lstlisting}
+for beta in [0, 1, 10000]:
+    model = NaiveBayes(4) if beta == 0 else NaiveBayesLaplace(4, beta)
+    model.fit(X, y)
+    print(beta, model.p_xy[:, 0])
+\end{lstlisting}
         \item One more time, fit a Na\"ive Bayes model with Laplace smoothing using $\beta=10000$. Look at $p(x_{ij} = 1 \ | \ y_i = 0)$. \ask{Do these numbers look like what you expect? Explain.}
         %
-        \ans{Since $\beta$ = 10000 is a very large number and because of this it overwhelms the counts, making the model behave as if 0 and 1 are almost equally likely for every
-        feature. This was to be expected since if $\beta$ = 1 was able to make the features become an already small non-zero its easy to imagin what could happen if a larger number
-        where to be inplemented instead}
+        \ans{With $\beta=10000$, the estimates $(N_{j,0}+10000)/(N_0+20000)$ are close to $1/2$ for every feature. This is expected because the balanced pseudo-counts dominate the observed counts; features consequently become much less informative about the class. The observed class-0 probabilities range from 0.448692 to 0.473774, compared with 0 to 0.244425 without smoothing.}
     \end{itemize}
 
     \clearpage
@@ -472,10 +494,11 @@ def fit(self, X, y):
     \ask{What is the cost of classifying $t$ test examples with the model and this way of computing the predictions?}
     %
 
-    \ans{The cost would be O(tkd)}
+    \ans{The cost is $O(tkd)$: for each of $t$ examples we compute $k$ class scores, each requiring $d$ feature-probability lookups and log additions, followed by an $O(k)$ maximum.}
 
     \clearpage
     \section{Random Forests \pts{15}}
+    {\small\textit{Assistance: OpenAI Codex assisted with code corrections, explanations, and verification; numerical results were computed from the supplied datasets.}}
 
     The file \texttt{vowels.pkl} contains a supervised learning dataset where we are trying to predict which of the 11 ``steady-state'' English vowels that a speaker is trying to pronounce.
 
@@ -497,78 +520,69 @@ def fit(self, X, y):
     \begin{enumerate}
         \item Using the provided code, evaluate the \texttt{RandomTree} model of unlimited depth. \ask{Why doesn't the random tree model have a training error of 0?} \pts{2}
         %
-        \ans{A Random Tree dosn't really have zero training error because it is trained using the bootstrap sample of the data, original examples are omitted}
+        \ans{A bootstrap sample omits about $(1-1/n)^n\approx e^{-1}\approx36.8\%$ of the original examples. A deep random tree may fit its sampled examples but misclassify omitted examples when evaluated on the full training set. The measured errors are reported in part 4 below.}
 
         \item For \texttt{RandomTree}, if you set the \texttt{max\_depth} value to \texttt{np.inf}, \ask{why do the training functions terminate instead of making an infinite number of splitting rules?} \pts{2}
         %
         \par\noindent\textcolor{gre}{Answer:}
-\begin{lstlisting}
-Setting the max depth to np.inf removes the depth restriction because np.inf goes to infinity, but it will stop when no useful split can be made. So it will terminate 
-        itself eventually
-\end{lstlisting}
+The recursion stops at a pure leaf or when no positive-information-gain split exists. Every accepted split produces two nonempty, strictly smaller subsets, so a finite dataset cannot support an infinite chain of splits, even without a depth limit.
 
                 
         \item Complete the \texttt{RandomForest} class in \texttt{random\string_tree.py}. This class takes in hyperparameters \texttt{num\string_trees} and \texttt{max\string_depth} and
         fits \texttt{num\string_trees} random trees each with maximum depth \texttt{max\string_depth}. For prediction, have all trees predict and then take the mode. \ask{Submit this code.} \pts{5}
         \par\noindent\textcolor{gre}{Answer:}
 \begin{lstlisting}
-def __init__(self, num_trees, max_depth):
-        #raise NotImplementedError()
+class RandomForest:
+    def __init__(self, num_trees, max_depth):
         self.num_trees = num_trees
         self.max_depth = max_depth
         self.trees = []
 
-
     def fit(self, X, y):
-        #resets self.trees
         self.trees = []
-        #raise NotImplementedError()
-        #Train num_trees seperate random trees
-        for i in range(self.num_trees):
-            #create,train, and save a random tree
+        for _ in range(self.num_trees):
             tree = RandomTree(max_depth=self.max_depth)
-            tree.fit(X,y)
-            self.tree.append(tree)
-
+            tree.fit(X, y)
+            self.trees.append(tree)
 
     def predict(self, X_pred):
-        #raise NotImplementedError()
-        #Num of examples we need to predict
-        n = X_pred.shape[0]
-
-        #each row = prediction from one tree
-        #each column = one example
-        tree_pred = np.zero((self.num_trees,n))
-        #get prediction from every tree
-        for p in range(self.num_trees):
-            tree_pred[p, :] = self.trees[p].predict(X_pred)
-        #Final predictions
-        y_pred = np.zero(n)
-
-        #majority vote
-        for v in range(n):
-            y_pred[v] = utils.mode(tree_pred[:, v])
-
-        return y_pred
+        predictions = np.array([tree.predict(X_pred) for tree in self.trees])
+        return np.array([utils.mode(predictions[:, i])
+                         for i in range(X_pred.shape[0])])
 \end{lstlisting}
 
         
         \item Using 50 trees, and a max depth of $\infty$, \ask{report the training and testing error}. Compare this to what we got with a single \texttt{DecisionTree} and with a single \texttt{RandomTree}. \ask{Are the results what you expected? Discuss.} \pts{3}
         %
-        \ans{Since we have unlimited depth the DecisionTree achives zero training error because its allowed to fit the entire data set. A single RandomTree has the higher
-        training error because of the bootstrap sample and because it only conciders random splits, The RandomForest combines 50 random trees using majority voting witch reduces
-        error This was some what expected because the RandomForest is ment to reduce the variance of a single random tree}
+        \ans{With maximum depth $\infty$, the observed errors were:
+\begin{center}
+\begin{tabular}{l|cc}
+Model & Training error & Test error \\ \hline
+Decision tree & 0.000 & 0.367 \\
+Random tree & 0.167 & 0.436 \\
+Random forest (50 trees) & 0.000 & 0.159
+\end{tabular}
+\end{center}
+The random tree and forest each use seed 4611, reset before fitting. The forest has much lower test error than either single tree while retaining zero training error. This matches the expected reduction in variance from voting across diverse trees; a single bootstrap tree can misclassify omitted training points and has unstable test predictions.}
         
+
+\begin{lstlisting}
+np.random.seed(4611)
+evaluate_model(RandomTree(max_depth=np.inf))
+np.random.seed(4611)
+evaluate_model(RandomForest(num_trees=50, max_depth=np.inf))
+# evaluate_model is the supplied training/test evaluation helper.
+\end{lstlisting}
         \item \ask{Why does a random forest typically have a training error of 0, even though random trees typically have a training error greater than 0?} \pts{3}
         %
-        \ans{A random forest normally has a training error of 0 becuase each random tree is trained on a different bootstrap sample, it does not see every
-        training example}
+        \ans{Each training example appears in about $1-e^{-1}\approx63.2\%$ of the bootstrap samples. Deep trees that include it tend to predict its label correctly, so these votes usually form a majority; voting can also correct errors from trees that omitted it. Thus the forest often has zero training error, although this is not guaranteed for finite forests, restricted trees, or conflicting labels.}
         
     \end{enumerate}
 
 
     \clearpage
     \section{Clustering \pts{15}}
+    {\small\textit{Assistance: OpenAI Codex assisted with code corrections, explanations, and verification; numerical results were computed from the supplied datasets.}}
 
     If you run \verb|python main.py 5|, it will load a dataset with two features
     and a very obvious clustering structure. It will then apply the $k$-means algorithm
@@ -594,27 +608,40 @@ def __init__(self, num_trees, max_depth):
         \par\noindent\textcolor{gre}{Answer:}
 \begin{lstlisting}
 def error(self, X, y, means):
-        # """YOUR CODE HERE FOR Q5.1"""
-        # raise NotImplementedError()
-
-        #calculates the sumn of the squared distance from 
-        #every data point to the mean of the cluster it is assigned to
-
-        error = 0
-
-        #goes through every data point, find the cluster that point belongs to and calculates how far the point is from the clusters mean
-        for i in range(X.shape[0]):
-            clusters = int(y[i])
-            #squares the distance and adds to total error
-            error += np.sum((X[i] - means[clusters]) ** 2)
-
-        return error
+    return float(np.sum((X - means[np.asarray(y, dtype=int)]) ** 2))
 \end{lstlisting}
 
 
+        \ans{The error is non-increasing after each assignment/update iteration and eventually becomes constant when the assignments stop changing. Assigning each point to its nearest mean and replacing each mean by its assigned points' average each minimize the objective with the other variables fixed.}
+
         \item Run $k$-means 50 times (with $k=4$) and take the one with the lowest error. \ask{Report the lowest error obtained.} Visualize the clustering obtained by this model, and \ask{submit your plot}. \pts{3}
         %
-        \ans{The lowest error obtained was 14641.961900}
+        \ans{The lowest sum of squared distances across 50 random initializations with $k=4$ was $3071.468053$ (NumPy seed 4611).}
+
+\begin{lstlisting}
+X = load_dataset("clusterData.pkl")["X"]
+
+np.random.seed(4611)
+best_error = np.inf
+for _ in range(50):
+    model = Kmeans(k=4)
+    model.fit(X)
+    error = model.error(X, model.predict(X), model.means)
+    if error < best_error:
+        best_error, best_model = error, model
+print('Lowest error:', best_error)
+print('Error history of best run:', best_model.errors_)
+plt.figure()
+plt.scatter(X[:, 0], X[:, 1], c=best_model.predict(X), cmap='tab10', s=15)
+plt.scatter(best_model.means[:, 0], best_model.means[:, 1], c='black', marker='X', s=110, label='Centroids')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title(f'Best of 50 initializations: k = 4, SSE = {best_error:.6f}')
+plt.legend()
+plt.tight_layout()
+plt.savefig('../figs/q5_best_clustering.png', dpi=180)
+plt.close()
+\end{lstlisting}
         \centerfig{.8}{a2/figs/q5_best_clustering.png}
 
     \end{enumerate}
@@ -628,56 +655,76 @@ def error(self, X, y, means):
     \begin{enumerate}
         \item \ask{Explain why we should not choose $k$ by taking the value that minimizes the \texttt{error} value.} \pts{2}
         %
-        \ans{We should not choose $k$ by taking the value that minimizes the \texttt{error} value because the error will decrease as $k$ increases}
+        \ans{The globally minimized training objective is non-increasing as $k$ increases, since additional centers can reproduce or improve a smaller model. At $k=n$, placing a center at every example gives zero error, so minimizing this criterion alone rewards complexity rather than a meaningful number of clusters.}
 
         \item \ask{Is evaluating the \texttt{error} function on validation (or test data) a suitable approach to choosing $k$?} \pts{2}
-        \ans{Evaluating the \texttt{error} function on a validation (or test data) is not suitable approach to choosing $k$ because increasing the number of clusters
-        generally allows the model to reduce the distance from points to there nearest center,even on unseen data}
+        \ans{Not by itself: more centers generally reduce nearest-center distances even for unseen points, so this distortion criterion does not adequately penalize complexity. Unlike supervised classification error, it need not expose overfitting as $k$ grows; an elbow or an appropriate complexity penalty is needed.}
 
         \item \ask{Hand in a plot of the minimum error found across 50 random initializations, as a function of $k$, taking $k$ from $1$ to $10$.} \pts{2}
         %
+
+\begin{lstlisting}
+X = load_dataset("clusterData.pkl")["X"]
+
+np.random.seed(4611)
+errors = []
+for k in range(1, 11):
+    best_error = np.inf
+    for _ in range(50):
+        model = Kmeans(k)
+        model.fit(X)
+        best_error = min(best_error, model.error(X, model.predict(X), model.means))
+    errors.append(best_error)
+print('Minimum errors for k=1,...,10:', errors)
+plt.figure()
+plt.plot(range(1, 11), errors, 'o-')
+plt.xlabel('Number of clusters, k')
+plt.ylabel('Minimum sum of squared distances')
+plt.xticks(range(1, 11))
+plt.title('Best of 50 initializations per k')
+plt.tight_layout()
+plt.savefig('../figs/q5_elbow.png', dpi=180)
+plt.close()
+\end{lstlisting}
         \ans{\centerfig{.8}{a2/figs/q5_elbow.png}}
 
         \item The \emph{elbow method} for choosing $k$ consists of looking at the above plot and visually trying to choose the $k$ that makes the sharpest ``elbow" (the biggest change in slope). \ask{What values of $k$ might be reasonable according to this method?} Note: there is not a single correct answer here; it is somewhat open to interpretation and there is a range of reasonable answers. \pts{2}
         %
-        \ans{Based on the following output the best $k$ for the elbow method would be $k$ = 4}
+        \ans{$k=3$ and $k=4$ are reasonable elbow choices. The error drops steeply through $k=3$, falls further from about 9909.52 to 3071.47 at $k=4$, and improves much less beyond that. I would choose $k=4$, which also captures the four visible groups.}
 
     \end{enumerate}
 
     \clearpage
     \section{Very-Short Answer Questions \pts{18}}
+    {\small Additional reference for optimization bias: \href{https://www.cs.ubc.ca/~schmidtm/Courses/340-F19/L5.pdf}{CPSC 340, Lecture 5, Mark Schmidt}.}
+    {\small\textit{Assistance: OpenAI Codex assisted with code corrections, explanations, and verification; numerical results were computed from the supplied datasets.}}
 
     \ask{Write a short one or two sentence answer to each of the questions below}. Make sure your answer is clear and concise.
 
     \begin{enumerate}
         \item What is a reason that the the data may not be IID in the email spam filtering example from lecture?
         %
-        \ans{data may not be IID in the email spam filtering example because emails from the same sender or time period can be correlated rather than generated independently 
-        generated, distribution can also change over time}
+        \ans{Emails from the same sender or spam campaign can be correlated, violating independence. The distribution can also change over time as topics and spam strategies change, violating identical distribution.}
 
         \item Why can't we (typically) use the training error to select a hyper-parameter?
         %
-        \ans{We can't use the training error to select a hyper-parameter because, the training error favors models that fit the data to closely, leading to 
-        validation errors}
+        \ans{Training error is optimistically biased because the model was fitted to those same observations. Minimizing it over hyperparameters tends to favor overly flexible models, so we use held-out validation or cross-validation instead.}
 
         \item What is the effect of the training or validation set size $n$ on the optimization bias, assuming we use a parametric model?
         %
-        \ans{The effects of training or validating a set size $n$ on the optimization bias is that a larger training set generally reduces optimization bias
-        because the fitted parameters are more representative of the underlying distribution}
+        \ans{For a fixed-complexity parametric model and a fixed amount of model selection, increasing the training or validation sample size generally reduces optimization bias: empirical errors fluctuate less, leaving less sampling noise to exploit. As $n$ grows, the optimistically low error caused by selecting on that set tends to shrink.}
 
         \item What is an advantage and a disadvantage of using a large $k$ value in $k$-fold cross-validation?
         %
-        \ans{The advantage would be a larger $k$ in $k$-fold cross-validation means each model is trained on more data so estimate is less bias.
-        However the disadvantage is a greater O(n) runtime cost because of the amount of models to be trained}
+        \ans{A larger $k$ trains each model on a fraction $(k-1)/k$ of the data, making its training size closer to that of the final model and reducing this source of bias. It costs more computation because $k$ models must be fitted and evaluated.}
 
         \item Recall that false positive in binary classification means $\hat y_i=1$ while $\tilde y_i = 0$. Give an example of when increasing false positives is an acceptable risk.
         %
-        \ans{An example of when increasing false positives is an acceptable risk would be in the case of a medical screaning or where it might be better to flag certain people
-        for a follow-up just to be safe}
+        \ans{In screening for a serious disease, accepting more false positives can be worthwhile if it reduces missed cases. A positive screening result can be checked with a confirmatory test before treatment.}
 
         \item Why can we ignore $p(x_i)$ when we use naive Bayes?
         %
-        \ans{We can ignore $p(x_i)$ when we use naive Bayes because it is the same for every possible class  $\tilde y_i$}
+        \ans{For a fixed input $x_i$, $p(x_i)$ is the same positive normalizing factor for every candidate class. It therefore does not change the class that maximizes the posterior probability.}
 
         \item For each of the three values below in a naive Bayes model, say whether it's better considered as a parameter or a hyper-parameter:
         \begin{enumerate}
@@ -695,12 +742,11 @@ def error(self, X, y, means):
 
         \item Both supervised learning and clustering models take in an input $x_i$ and produce a label $y_i$. What is the key difference between these types of models?
         %
-        \ans{The key difference is that in supervised learning the labels have known meanings based on labeled training data, where as in clustering
-        the labels are created by the algorithm and usually only indicate membership}
+        \ans{Supervised learning learns to predict externally supplied target labels from labeled examples. Clustering receives no target labels and assigns arbitrary group identifiers based on similarities in the inputs.}
 
         \item In $k$-means clustering the clusters are guaranteed to be convex regions. Are the areas that are given the same label by kNN also convex?
         %
-        \ans{The areas that are not given the same label by kNN also convex}
+        \ans{No. A class region can be a non-convex or disconnected union of neighbourhoods; even for 1-NN, several separate Voronoi cells may share a class label while a different class lies between them.}
 
     \end{enumerate}
 

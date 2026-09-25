@@ -24,19 +24,15 @@ class NaiveBayes:
         counts = np.bincount(y)
         p_y = counts / n
 
-        """YOUR CODE HERE FOR Q3.3"""
 
         # Compute the conditional probabilities i.e.
         # p(x_ij=1 | y_i==c) as p_xy[j, c]
         # p(x_ij=0 | y_i==c) as 1 - p_xy[j, c]
-        # p_xy = 0.5 * np.ones((d, k))
-        # # TODO: replace the above line with the proper code
         p_xy = np.zeros((d,k))
 
         for col in range(k):
             x_col = X[y==col]
-            p_xy = np.mean(x_col, axis = 0)
-        # raise NotImplementedError()
+            p_xy[:, col] = np.mean(x_col, axis=0)
 
 
         self.p_y = p_y
@@ -69,9 +65,11 @@ class NaiveBayesLaplace(NaiveBayes):
         self.beta = beta
 
     def fit(self, X, y):
-        """YOUR CODE FOR Q3.4"""
-        raise NotImplementedError()
-
-
-        self.p_y = p_y
-        self.p_xy = p_xy
+        n, d = X.shape
+        self.p_y = np.bincount(y, minlength=self.num_classes) / n
+        self.p_xy = np.zeros((d, self.num_classes))
+        for c in range(self.num_classes):
+            X_c = X[y == c]
+            self.p_xy[:, c] = (X_c.sum(axis=0) + self.beta) / (
+                X_c.shape[0] + 2 * self.beta
+            )

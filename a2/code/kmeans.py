@@ -11,6 +11,7 @@ class Kmeans:
     def fit(self, X):
         n, d = X.shape
         y = np.ones(n)
+        self.errors_ = []
 
         means = np.zeros((self.k, d))
         for kk in range(self.k):
@@ -34,6 +35,7 @@ class Kmeans:
                     means[kk] = X[y == kk].mean(axis=0)
 
             changes = np.sum(y != y_old)
+            self.errors_.append(self.error(X, y, means))
             # print('Running K-means, changes in cluster assignment = {}'.format(changes))
 
             # Stop if no point changed cluster
@@ -51,6 +53,4 @@ class Kmeans:
         return np.argmin(distance_matrix, axis=1)
 
     def error(self, X, y, means):
-        """YOUR CODE HERE FOR Q5.1"""
-        raise NotImplementedError()
-
+        return float(np.sum((X - means[np.asarray(y, dtype=int)]) ** 2))

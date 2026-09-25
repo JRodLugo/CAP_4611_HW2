@@ -4,11 +4,11 @@ import os
 import pickle
 from pathlib import Path
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import utils
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
 
 # make sure we're working in the directory this file lives in,
 # for imports and for simplicity with relative paths
@@ -33,8 +33,6 @@ def q1():
     X_test = dataset["Xtest"]
     y_test = dataset["ytest"]
 
-    #"""YOUR CODE HERE FOR Q1. Also modify knn.py to implement KNN predict."""
-    #raise NotImplementedError()
     for k in [1,3,10]:
         print("k = ", k)
         model = KNN(k)
@@ -54,8 +52,12 @@ def q1():
 
     #generates the plot for k = 1
     modl2 = KNN(1)
-    utils.plot_classifier(modl2.fit(X,y), X, y)
-    plt.show()
+    modl2.fit(X, y)
+    utils.plot_classifier(modl2, X, y)
+    plt.xlabel('Feature 1')
+    plt.ylabel('Feature 2')
+    plt.savefig('../figs/q1_knn_boundary.png', dpi=180, bbox_inches='tight')
+    plt.close()
 
 
 @handle("2")
@@ -66,14 +68,12 @@ def q2():
     X_test = dataset["Xtest"]
     y_test = dataset["ytest"]
 
-    #"""YOUR CODE HERE FOR Q2"""
     ks = list(range(1, 30, 4))
     cv_accs = [] #stores the mean accurancy across folds for each k
     cv_err = [] #stores the mean error across folds for each k 
     num_train_ex = X.shape[0]
     fold_size = num_train_ex // 10
     
-    #raise NotImplementedError()
     
     #implement 10-fold cross-validation
     for depth in ks:
@@ -84,8 +84,8 @@ def q2():
         for fold in range(10):
             #begin with everything marked as true
             mask = np.ones(num_train_ex, dtype=bool)
-            start = fold * fold_size
-            end = (fold  + 1 ) * fold_size
+            start = fold * num_train_ex // 10
+            end = (fold + 1) * num_train_ex // 10
 
             #mark validation examples as false
             mask[start:end] = False
@@ -128,6 +128,31 @@ def q2():
     print("Test Accuracy: ", test_accs)
     print("Test Error: ", test_err)
 
+    train_errors = []
+    for k in ks:
+        model = KNN(k)
+        model.fit(X, y)
+        train_errors.append(float(np.mean(model.predict(X) != y)))
+    print('Training errors:', train_errors)
+    plt.figure()
+    plt.plot(ks, cv_accs, 'o-', label='10-fold cross-validation')
+    plt.plot(ks, test_accs, 's-', label='Test')
+    plt.xlabel('Number of neighbours, k')
+    plt.ylabel('Accuracy')
+    plt.xticks(ks)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('../figs/q2_cv_test_accuracy.png', dpi=180)
+    plt.close()
+    plt.figure()
+    plt.plot(ks, train_errors, 'o-')
+    plt.xlabel('Number of neighbours, k')
+    plt.ylabel('Training error (fraction misclassified)')
+    plt.xticks(ks)
+    plt.tight_layout()
+    plt.savefig('../figs/q2_training_error.png', dpi=180)
+    plt.close()
+
 
 @handle("3.2")
 def q3_2():
@@ -143,8 +168,9 @@ def q3_2():
     #set of words that correspond to each column
     wordlist = dataset["wordlist"]
 
-    # """YOUR CODE HERE FOR Q3.2"""
-    # raise NotImplementedError()
+    print('Word 73:', wordlist[72])
+    print('Words in example 803:', np.asarray(wordlist)[X[802]])
+    print('Group:', groupnames[y[802]])
 
     
 
@@ -164,7 +190,6 @@ def q3_3():
     print(f"t = {X_valid.shape[0]}")
     print(f"Num classes = {len(np.unique(y))}")
 
-    """CODE FOR Q3.4: Modify naive_bayes.py/NaiveBayesLaplace"""
 
     model = NaiveBayes(num_classes=4)
     model.fit(X, y)
@@ -195,8 +220,15 @@ def q3_4():
     model = NaiveBayes(num_classes=4)
     model.fit(X, y)
 
-    """YOUR CODE HERE FOR Q3.4. Also modify naive_bayes.py/NaiveBayesLaplace"""
-    raise NotImplementedError()
+    for beta in [0, 1, 10000]:
+        model = NaiveBayes(4) if beta == 0 else NaiveBayesLaplace(4, beta)
+        model.fit(X, y)
+        probabilities = model.p_xy[:, 0]
+        print('beta:', beta, 'class 0 probabilities:', probabilities)
+        print('Zeros:', np.sum(probabilities == 0),
+              'Range:', probabilities.min(), probabilities.max())
+        print('Training error:', np.mean(model.predict(X) != y))
+        print('Validation error:', np.mean(model.predict(X_valid) != y_valid))
 
 
 
@@ -223,8 +255,12 @@ def q4():
     print("Decision tree info gain")
     evaluate_model(DecisionTree(max_depth=np.inf, stump_class=DecisionStumpInfoGain))
 
-    """YOUR CODE FOR Q4. Also modify random_tree.py/RandomForest"""
-    raise NotImplementedError()
+    np.random.seed(4611)
+    print('Random tree (seed 4611)')
+    evaluate_model(RandomTree(max_depth=np.inf))
+    np.random.seed(4611)
+    print('Random forest (50 trees, seed 4611)')
+    evaluate_model(RandomForest(num_trees=50, max_depth=np.inf))
 
 
 
@@ -246,8 +282,26 @@ def q5():
 def q5_1():
     X = load_dataset("clusterData.pkl")["X"]
 
-    """YOUR CODE HERE FOR Q5.1. Also modify kmeans.py/Kmeans"""
-    raise NotImplementedError()
+    np.random.seed(4611)
+    best_error = np.inf
+    for _ in range(50):
+        model = Kmeans(k=4)
+        model.fit(X)
+        error = model.error(X, model.predict(X), model.means)
+        if error < best_error:
+            best_error, best_model = error, model
+    print('Lowest error:', best_error)
+    print('Error history of best run:', best_model.errors_)
+    plt.figure()
+    plt.scatter(X[:, 0], X[:, 1], c=best_model.predict(X), cmap='tab10', s=15)
+    plt.scatter(best_model.means[:, 0], best_model.means[:, 1], c='black', marker='X', s=110, label='Centroids')
+    plt.xlabel('Feature 1')
+    plt.ylabel('Feature 2')
+    plt.title(f'Best of 50 initializations: k = 4, SSE = {best_error:.6f}')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('../figs/q5_best_clustering.png', dpi=180)
+    plt.close()
 
 
 
@@ -255,8 +309,25 @@ def q5_1():
 def q5_2():
     X = load_dataset("clusterData.pkl")["X"]
 
-    """YOUR CODE HERE FOR Q5.2"""
-    raise NotImplementedError()
+    np.random.seed(4611)
+    errors = []
+    for k in range(1, 11):
+        best_error = np.inf
+        for _ in range(50):
+            model = Kmeans(k)
+            model.fit(X)
+            best_error = min(best_error, model.error(X, model.predict(X), model.means))
+        errors.append(best_error)
+    print('Minimum errors for k=1,...,10:', errors)
+    plt.figure()
+    plt.plot(range(1, 11), errors, 'o-')
+    plt.xlabel('Number of clusters, k')
+    plt.ylabel('Minimum sum of squared distances')
+    plt.xticks(range(1, 11))
+    plt.title('Best of 50 initializations per k')
+    plt.tight_layout()
+    plt.savefig('../figs/q5_elbow.png', dpi=180)
+    plt.close()
 
 
 

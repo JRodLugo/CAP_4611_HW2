@@ -1,2 +1,5 @@
 .plot_dependencies/
 __pycache__/
+.tools/
+*.aux
+*.log

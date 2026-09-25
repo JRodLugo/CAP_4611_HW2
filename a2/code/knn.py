@@ -20,7 +20,6 @@ class KNN:
         self.y = y
 
     def predict(self, X_hat):
-        #"""YOUR CODE HERE FOR Q1"""
         #fills in the k-nearest neigbor prediction rule
         #distance = num of training points(i) * num of test points(j)
         distance = euclidean_dist_squared(self.X, X_hat)
@@ -38,6 +37,5 @@ class KNN:
 
         #return the predictions
         return Y_hat 
-        #raise NotImplementedError()
 
 
