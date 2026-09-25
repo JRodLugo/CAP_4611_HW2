@@ -9,6 +9,7 @@
 \usepackage{url}
 \usepackage{verbatim}
 \usepackage{graphicx}
+\graphicspath{{a2/figs/}{figs/}{a2/}}
 \usepackage{parskip}
 \usepackage{amssymb}
 \usepackage{hyperref}
@@ -46,13 +47,21 @@
 \newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
 
 % LaTeX
-\newcommand{\fig}[2]{\IfFileExists{#2}{\includegraphics[width=#1\textwidth]{#2}}{\fbox{\parbox{#1\textwidth}{\centering Missing figure: \texttt{\detokenize{#2}}}}}}
-\newcommand{\centerfig}[2]{\begin{center}\IfFileExists{#2}{\includegraphics[width=#1\textwidth]{#2}}{\fbox{\parbox{#1\textwidth}{\centering Missing figure: \texttt{\detokenize{#2}}}}}\end{center}}
+% Note: \IfFileExists does not search \graphicspath, so we try a2/figs/ explicitly.
+\newcommand{\fig}[2]{%
+  \IfFileExists{#2}{\includegraphics[width=#1\textwidth]{#2}}{%
+    \IfFileExists{a2/figs/#2}{\includegraphics[width=#1\textwidth]{a2/figs/#2}}{%
+      \fbox{\parbox{#1\textwidth}{\centering Missing figure: \texttt{\detokenize{#2}}}}%
+    }%
+  }%
+}
+\newcommand{\centerfig}[2]{\begin{center}\fig{#1}{#2}\end{center}}
 
 
 \begin{document}
     \title{CAP 4611 Assignment 2}
-    \author{Jayden Rodriguez Lugo, David Navarrete}
+    \author{\textbf{Jayden Rodriguez Lugo - 1234567} and 
+    \textbf{David Navarrete - 5479357}}
     \date{}
     \maketitle
     % Remove the second author line if submitting individually.
@@ -60,7 +69,7 @@
 
     \section*{Important: Submission Format \pts{5}}
 
-    Please make sure to follow the submission instructions posted on the
+    Please make s sure to follow the submission instructions posted on the
     course website and on the webcourses. Here is a \href{https://www.dropbox.com/scl/fi/gpwv8s5b6xx16cepm1bn9/submission_instructions.pdf?rlkey=m3l066bopj9bu1l9m53rbcucs&raw=1}{direct link to the instructions}.
     \ask{We will deduct marks if the submission format is incorrect, or
     if your handwriting is \emph{at all} difficult to read} -- at least
@@ -124,9 +133,7 @@ utils.plot_classifier(model, X, y)
 plt.savefig('../figs/q1_knn_boundary.png')
 \end{lstlisting}
         \item Generate a plot with \texttt{utils.plot\_classifier} on the \emph{citiesSmall} dataset (plotting the training points) for $k=1$, using your implementation of kNN. \ask{Include the plot here.} To see if your implementation makes sense, you might want to check against the plot using \texttt{sklearn.neighbors.KNeighborsClassifier}. Remember that the assignment 1 code had examples of plotting with this function and saving the result, if that would be helpful. \pts{2}
-        \ans{
-            \ans{\centerfig{.8}{citiesSmall_knn_k1.png}}
-        }
+        \ans{\centerfig{.8}{q1_knn_boundary.png}}
         \item Why is the training error $0$ for $k=1$? \pts{2}
 
         \ans{For $k=1$, a training example is its own nearest neighbour at distance zero, so it receives its own label. Thus the training error is zero on this dataset, with ties handled as specified.}
@@ -203,15 +210,15 @@ def q2():
         \item The point of cross-validation is to get a sense of what the test error for a particular value of $k$ would be. Implement, similarly to the code you wrote for question 1.2, a loop to compute the test accuracy for each value of $k$ above. \ask{Submit a plot the cross-validation and test accuracies as a function of $k$.} Make sure your plot has axis labels and a legend. \pts{5}
 
         %
-        \ans{\centerfig{.8}{knn_q2_accuracy.png}}
+        \ans{\centerfig{.8}{q2_cv_test_accuracy.png}}
         
         \item Which $k$ would cross-validation choose in this case? Which $k$ has the best test accuracy? Would the cross-validation $k$ do okay (qualitatively) in terms of test accuracy? \pts{2}
         %
         \ans{Cross-validation chooses $k=17$, with mean accuracy 0.7355. Test accuracy is highest at $k=9$ (0.7380). The cross-validation choice performs well: its test accuracy is 0.7300, only 0.8 percentage points below the best observed test accuracy. The test comparison is retrospective; it is not used to choose $k$.}
         \item Separately, \ask{submit a plot of the training error as a function of $k$. How would the $k$ with best training error do in terms of test error, qualitatively?} \pts{3}
         %
-        \centerfig{.8}{knn_q2_training_error.png}
-        \ans{The K with the best training error would be 1 with a training error of .408 dispite having a .592 training accuracy. This could be the result of possible over fitting.}
+        \centerfig{.8}{q2_training_error.png}
+        \ans{The $k$ with the best training error would be $k=1$ (lowest training error), but it would typically do poorly on test error because it overfits (high variance).}
     \end{enumerate}
 
 
@@ -566,8 +573,8 @@ def error(self, X, y, means):
 
         \item Run $k$-means 50 times (with $k=4$) and take the one with the lowest error. \ask{Report the lowest error obtained.} Visualize the clustering obtained by this model, and \ask{submit your plot}. \pts{3}
         %
-        \ans{The lowest error obtained was 14641.961900}
-        \ans{\centerfig{.8}{kmeans_5.1_model.png}}
+        \ans{The lowest error obtained was 3071.468053.}
+        \ans{\centerfig{.8}{q5_best_clustering.png}}
 
     \end{enumerate}
 
@@ -584,10 +591,10 @@ def error(self, X, y, means):
 
         \item \ask{Is evaluating the \texttt{error} function on validation (or test data) a suitable approach to choosing $k$?} \pts{2}
         \ans{Not by itself: more centers generally reduce nearest-center distances even for unseen points, so this distortion criterion does not adequately penalize complexity. Unlike supervised classification error, it need not expose overfitting as $k$ grows; an elbow or an appropriate complexity penalty is needed.}
-
         \item \ask{Hand in a plot of the minimum error found across 50 random initializations, as a function of $k$, taking $k$ from $1$ to $10$.} \pts{2}
         %
-        \ans{\centerfig{.8}{kmeans_5.2_model.png}}
+        \ans{\centerfig{.8}{q5_elbow.png}}
+
 
         \item The \emph{elbow method} for choosing $k$ consists of looking at the above plot and visually trying to choose the $k$ that makes the sharpest ``elbow" (the biggest change in slope). \ask{What values of $k$ might be reasonable according to this method?} Note: there is not a single correct answer here; it is somewhat open to interpretation and there is a range of reasonable answers. \pts{2}
         %
