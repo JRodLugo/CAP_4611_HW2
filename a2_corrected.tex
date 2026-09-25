@@ -52,7 +52,7 @@
 
 \begin{document}
     \title{CAP 4611 Assignment 2}
-    \author{[Student 1 Full Name] --- [Student 1 Number]\\{}[Student 2 Full Name] --- [Student 2 Number]}
+    \author{Jayden Rodriguez Lugo, David Navarrete}
     \date{}
     \maketitle
     % Remove the second author line if submitting individually.
@@ -125,7 +125,7 @@ plt.savefig('../figs/q1_knn_boundary.png')
 \end{lstlisting}
         \item Generate a plot with \texttt{utils.plot\_classifier} on the \emph{citiesSmall} dataset (plotting the training points) for $k=1$, using your implementation of kNN. \ask{Include the plot here.} To see if your implementation makes sense, you might want to check against the plot using \texttt{sklearn.neighbors.KNeighborsClassifier}. Remember that the assignment 1 code had examples of plotting with this function and saving the result, if that would be helpful. \pts{2}
         \ans{
-            \centerfig{.8}{a2/figs/q1_knn_boundary.png}
+            \ans{\centerfig{.8}{citiesSmall_knn_k1.png}}
         }
         \item Why is the training error $0$ for $k=1$? \pts{2}
 
@@ -203,65 +203,15 @@ def q2():
         \item The point of cross-validation is to get a sense of what the test error for a particular value of $k$ would be. Implement, similarly to the code you wrote for question 1.2, a loop to compute the test accuracy for each value of $k$ above. \ask{Submit a plot the cross-validation and test accuracies as a function of $k$.} Make sure your plot has axis labels and a legend. \pts{5}
 
         %
+        \ans{\centerfig{.8}{knn_q2_accuracy.png}}
         
-\begin{lstlisting}
-#test accuracy
-    test_accs = []
-    test_err = []
-    for k in ks:
-         #train KNN
-        model = KNN(k)
-        model.fit(X, y)
-        
-        #make predictions, get the accuracy
-        y_predictions = model.predict(X_test)
-        accuracy = np.mean(y_predictions == y_test)
-        foldError = np.mean(y_predictions != y_test)
-
-        #store accuracy and error
-        test_accs.append(accuracy)
-        test_err.append(foldError)
-
-    print("Current ks: ", ks)
-    print("Cross-Validation Accuracy: ", cv_accs)
-    print("Cross-Validation Error: ", cv_err)
-    print("Test Accuracy: ", test_accs)
-    print("Test Error: ", test_err)
-
-    train_errors = []
-    for k in ks:
-        model = KNN(k)
-        model.fit(X, y)
-        train_errors.append(float(np.mean(model.predict(X) != y)))
-    print('Training errors:', train_errors)
-    plt.figure()
-    plt.plot(ks, cv_accs, 'o-', label='10-fold cross-validation')
-    plt.plot(ks, test_accs, 's-', label='Test')
-    plt.xlabel('Number of neighbours, k')
-    plt.ylabel('Accuracy')
-    plt.xticks(ks)
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig('../figs/q2_cv_test_accuracy.png', dpi=180)
-    plt.close()
-    plt.figure()
-    plt.plot(ks, train_errors, 'o-')
-    plt.xlabel('Number of neighbours, k')
-    plt.ylabel('Training error (fraction misclassified)')
-    plt.xticks(ks)
-    plt.tight_layout()
-    plt.savefig('../figs/q2_training_error.png', dpi=180)
-    plt.close()
-\end{lstlisting}
-\ans{\centerfig{.8}{a2/figs/q2_cv_test_accuracy.png}}
         \item Which $k$ would cross-validation choose in this case? Which $k$ has the best test accuracy? Would the cross-validation $k$ do okay (qualitatively) in terms of test accuracy? \pts{2}
-
         %
         \ans{Cross-validation chooses $k=17$, with mean accuracy 0.7355. Test accuracy is highest at $k=9$ (0.7380). The cross-validation choice performs well: its test accuracy is 0.7300, only 0.8 percentage points below the best observed test accuracy. The test comparison is retrospective; it is not used to choose $k$.}
         \item Separately, \ask{submit a plot of the training error as a function of $k$. How would the $k$ with best training error do in terms of test error, qualitatively?} \pts{3}
         %
-        \ans{The best training error occurs at $k=1$ and is 0, corresponding to training accuracy 1. Its test error is 0.3500, the worst among the tested choices, illustrating that fitting the training data perfectly does not imply good generalization.}
-        \centerfig{.8}{a2/figs/q2_training_error.png}
+        \centerfig{.8}{knn_q2_training_error.png}
+        \ans{The K with the best training error would be 1 with a training error of .408 dispite having a .592 training accuracy. This could be the result of possible over fitting.}
     \end{enumerate}
 
 
@@ -588,10 +538,10 @@ evaluate_model(RandomForest(num_trees=50, max_depth=np.inf))
     and a very obvious clustering structure. It will then apply the $k$-means algorithm
     with a random initialization. The result of applying the
     algorithm will thus depend on the randomization, but a typical run might look like this:
-    \centerfig{.5}{a2/figs/kmeans_basic.png}
+    \centerfig{.5}{kmeans_basic.png}
     (Note that the colours are arbitrary -- this is the label switching issue.)
     But the ``correct'' clustering (that was used to make the data) is this:
-    \centerfig{.5}{a2/figs/kmeans_good.png}
+    \centerfig{.5}{kmeans_good.png}
 
 
     \clearpage
@@ -616,33 +566,8 @@ def error(self, X, y, means):
 
         \item Run $k$-means 50 times (with $k=4$) and take the one with the lowest error. \ask{Report the lowest error obtained.} Visualize the clustering obtained by this model, and \ask{submit your plot}. \pts{3}
         %
-        \ans{The lowest sum of squared distances across 50 random initializations with $k=4$ was $3071.468053$ (NumPy seed 4611).}
-
-\begin{lstlisting}
-X = load_dataset("clusterData.pkl")["X"]
-
-np.random.seed(4611)
-best_error = np.inf
-for _ in range(50):
-    model = Kmeans(k=4)
-    model.fit(X)
-    error = model.error(X, model.predict(X), model.means)
-    if error < best_error:
-        best_error, best_model = error, model
-print('Lowest error:', best_error)
-print('Error history of best run:', best_model.errors_)
-plt.figure()
-plt.scatter(X[:, 0], X[:, 1], c=best_model.predict(X), cmap='tab10', s=15)
-plt.scatter(best_model.means[:, 0], best_model.means[:, 1], c='black', marker='X', s=110, label='Centroids')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title(f'Best of 50 initializations: k = 4, SSE = {best_error:.6f}')
-plt.legend()
-plt.tight_layout()
-plt.savefig('../figs/q5_best_clustering.png', dpi=180)
-plt.close()
-\end{lstlisting}
-        \centerfig{.8}{a2/figs/q5_best_clustering.png}
+        \ans{The lowest error obtained was 14641.961900}
+        \ans{\centerfig{.8}{kmeans_5.1_model.png}}
 
     \end{enumerate}
 
@@ -662,31 +587,7 @@ plt.close()
 
         \item \ask{Hand in a plot of the minimum error found across 50 random initializations, as a function of $k$, taking $k$ from $1$ to $10$.} \pts{2}
         %
-
-\begin{lstlisting}
-X = load_dataset("clusterData.pkl")["X"]
-
-np.random.seed(4611)
-errors = []
-for k in range(1, 11):
-    best_error = np.inf
-    for _ in range(50):
-        model = Kmeans(k)
-        model.fit(X)
-        best_error = min(best_error, model.error(X, model.predict(X), model.means))
-    errors.append(best_error)
-print('Minimum errors for k=1,...,10:', errors)
-plt.figure()
-plt.plot(range(1, 11), errors, 'o-')
-plt.xlabel('Number of clusters, k')
-plt.ylabel('Minimum sum of squared distances')
-plt.xticks(range(1, 11))
-plt.title('Best of 50 initializations per k')
-plt.tight_layout()
-plt.savefig('../figs/q5_elbow.png', dpi=180)
-plt.close()
-\end{lstlisting}
-        \ans{\centerfig{.8}{a2/figs/q5_elbow.png}}
+        \ans{\centerfig{.8}{kmeans_5.2_model.png}}
 
         \item The \emph{elbow method} for choosing $k$ consists of looking at the above plot and visually trying to choose the $k$ that makes the sharpest ``elbow" (the biggest change in slope). \ask{What values of $k$ might be reasonable according to this method?} Note: there is not a single correct answer here; it is somewhat open to interpretation and there is a range of reasonable answers. \pts{2}
         %
