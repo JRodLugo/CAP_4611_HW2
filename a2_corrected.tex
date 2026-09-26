@@ -60,7 +60,7 @@
 
 \begin{document}
     \title{CAP 4611 Assignment 2}
-    \author{\textbf{Jayden Rodriguez Lugo - 1234567} and 
+    \author{\textbf{Jayden Rodriguez Lugo - 5505335} and 
     \textbf{David Navarrete - 5479357}}
     \date{}
     \maketitle
@@ -133,7 +133,7 @@ utils.plot_classifier(model, X, y)
 plt.savefig('../figs/q1_knn_boundary.png')
 \end{lstlisting}
         \item Generate a plot with \texttt{utils.plot\_classifier} on the \emph{citiesSmall} dataset (plotting the training points) for $k=1$, using your implementation of kNN. \ask{Include the plot here.} To see if your implementation makes sense, you might want to check against the plot using \texttt{sklearn.neighbors.KNeighborsClassifier}. Remember that the assignment 1 code had examples of plotting with this function and saving the result, if that would be helpful. \pts{2}
-        \ans{\centerfig{.8}{q1_knn_boundary.png}}
+        \ans{\centerfig{.61}{q1_knn_boundary.png}}
         \item Why is the training error $0$ for $k=1$? \pts{2}
 
         \ans{For $k=1$, a training example is its own nearest neighbour at distance zero, so it receives its own label. Thus the training error is zero on this dataset, with ties handled as specified.}
@@ -144,7 +144,6 @@ plt.savefig('../figs/q1_knn_boundary.png')
 
     \end{enumerate}
 
-    \clearpage
     \section{Picking $k$ in kNN \pts{15}}
     {\small\textit{Assistance: OpenAI Codex assisted with code corrections, explanations, and verification; numerical results were computed from the supplied datasets.}}
     The file \texttt{data/ccdata.pkl} contains a subset of \href{https://www23.statcan.gc.ca/imdb/p2SV.pl?Function=getSurvey&SDDS=2620}{Statistics Canada's 2019 Survey of Financial Security}; we're predicting whether a family regularly carries credit card debt, based on a bunch of demographic and financial information about them. (You might imagine social science researchers wanting to do something like this if they don't have debt information available -- or various companies wanting to do it for less altruistic reasons.) If you're curious what the features are, you can look at the \texttt{'feat\_descs'} entry in the dataset dictionary.
@@ -210,7 +209,7 @@ def q2():
         \item The point of cross-validation is to get a sense of what the test error for a particular value of $k$ would be. Implement, similarly to the code you wrote for question 1.2, a loop to compute the test accuracy for each value of $k$ above. \ask{Submit a plot the cross-validation and test accuracies as a function of $k$.} Make sure your plot has axis labels and a legend. \pts{5}
 
         %
-        \ans{\centerfig{.8}{q2_cv_test_accuracy.png}}
+        \ans{\centerfig{.55}{q2_cv_test_accuracy.png}}
         
         \item Which $k$ would cross-validation choose in this case? Which $k$ has the best test accuracy? Would the cross-validation $k$ do okay (qualitatively) in terms of test accuracy? \pts{2}
         %
@@ -340,7 +339,6 @@ def q2():
     For each class these two additional examples add one zero and one one to every feature. For example, $P(\mathrm{name}=1\mid\mathrm{spam})=(1+1)/(6+2)=2/8$, exactly the estimate with $\beta=1$.
     }
 
-    \clearpage
     \subsection{Exploring Bag-of-Words \pts{2}}
 
     If you run \texttt{python main.py 3.2}, it will load the following dataset:
@@ -364,7 +362,6 @@ def q2():
         \ans{\texttt{talk.*}}
     \end{enumerate}
 
-    \clearpage
     \subsection{Na\"ive Bayes Implementation \pts{4}}
 
     If you run \texttt{python main.py 3.3}
@@ -389,7 +386,6 @@ for c in range(k):
 
     \ans{Training error: $0.199852$ (19.9852\%). Validation error: $0.187662$ (18.7662\%). These results use the supplied prediction method and the corrected class-conditional estimates.}
 
-    \clearpage
     \subsection{Laplace Smoothing Implementation \pts{4}}
 
     Laplace smoothing is one way to prevent failure cases of Na\"ive Bayes based on counting. Recall what you know from lecture to implement Laplace smoothing to your Na\"ive Bayes model.
@@ -425,7 +421,6 @@ for beta in [0, 1, 10000]:
         \ans{With $\beta=10000$, the estimates $(N_{j,0}+10000)/(N_0+20000)$ are close to $1/2$ for every feature. This is expected because the balanced pseudo-counts dominate the observed counts; features consequently become much less informative about the class. The observed class-0 probabilities range from 0.448692 to 0.473774, compared with 0 to 0.244425 without smoothing.}
     \end{itemize}
 
-    \clearpage
     \subsection{Runtime of Na\"ive Bayes for Discrete Data \pts{2}}
 
     For a given training example $i$, the predict function in the provided code computes the quantity
@@ -537,7 +532,6 @@ evaluate_model(RandomForest(num_trees=50, max_depth=np.inf))
     \end{enumerate}
 
 
-    \clearpage
     \section{Clustering \pts{15}}
     {\small\textit{Assistance: OpenAI Codex assisted with code corrections, explanations, and verification; numerical results were computed from the supplied datasets.}}
 
@@ -551,7 +545,6 @@ evaluate_model(RandomForest(num_trees=50, max_depth=np.inf))
     \centerfig{.5}{kmeans_good.png}
 
 
-    \clearpage
     \subsection{Selecting Among $k$-means Initializations \pts{7}}
 
     If you run the demo several times, it will find different clusterings. To select among clusterings for a \emph{fixed} value of $k$, one strategy is to minimize the sum of squared distances between examples $x_i$ and their means $w_{y_i}$,
@@ -570,16 +563,15 @@ def error(self, X, y, means):
 
 
         \ans{The error is non-increasing after each assignment/update iteration and eventually becomes constant when the assignments stop changing. Assigning each point to its nearest mean and replacing each mean by its assigned points' average each minimize the objective with the other variables fixed.}
-
+\clearpage
         \item Run $k$-means 50 times (with $k=4$) and take the one with the lowest error. \ask{Report the lowest error obtained.} Visualize the clustering obtained by this model, and \ask{submit your plot}. \pts{3}
         %
         \ans{The lowest error obtained was 3071.468053.}
-        \ans{\centerfig{.8}{q5_best_clustering.png}}
+        \ans{\centerfig{.65}{q5_best_clustering.png}}
 
     \end{enumerate}
 
 
-    \clearpage
     \subsection{Selecting $k$ in $k$-means \pts{8}}
 
     We now turn to the task of choosing the number of clusters $k$.
@@ -591,9 +583,12 @@ def error(self, X, y, means):
 
         \item \ask{Is evaluating the \texttt{error} function on validation (or test data) a suitable approach to choosing $k$?} \pts{2}
         \ans{Not by itself: more centers generally reduce nearest-center distances even for unseen points, so this distortion criterion does not adequately penalize complexity. Unlike supervised classification error, it need not expose overfitting as $k$ grows; an elbow or an appropriate complexity penalty is needed.}
+
+    \clearpage
+        
         \item \ask{Hand in a plot of the minimum error found across 50 random initializations, as a function of $k$, taking $k$ from $1$ to $10$.} \pts{2}
         %
-        \ans{\centerfig{.8}{q5_elbow.png}}
+        \ans{\centerfig{.65}{q5_elbow.png}}
 
 
         \item The \emph{elbow method} for choosing $k$ consists of looking at the above plot and visually trying to choose the $k$ that makes the sharpest ``elbow" (the biggest change in slope). \ask{What values of $k$ might be reasonable according to this method?} Note: there is not a single correct answer here; it is somewhat open to interpretation and there is a range of reasonable answers. \pts{2}
@@ -602,7 +597,6 @@ def error(self, X, y, means):
 
     \end{enumerate}
 
-    \clearpage
     \section{Very-Short Answer Questions \pts{18}}
     {\small Additional reference for optimization bias: \href{https://www.cs.ubc.ca/~schmidtm/Courses/340-F19/L5.pdf}{CPSC 340, Lecture 5, Mark Schmidt}.}
     {\small\textit{Assistance: OpenAI Codex assisted with code corrections, explanations, and verification; numerical results were computed from the supplied datasets.}}
